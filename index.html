@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Main page</title>
+  <style>
+    .bg-form input {
+      display: block;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="left-segment">
+    <div class="segment" id="segment1">
+      <h1 id="heading-X">Heading Y</h1>
+    </div>
+
+    <div class="segment" id="segment3">
+      <form id="areaForm">
+        <h3>Calculate Parallelogram Area</h3>
+        <label for="baseInput">Enter base:</label><br>
+        <input type="number" id="baseInput" required><br><br>
+        <label for="heightInput">Enter height:</label><br>
+        <input type="number" id="heightInput" required><br><br>
+        <button type="button" id="calculateAreaButton">Calculate Area</button>
+      </form>
+      <div id="areaResult"></div>
+
+      <form id="wordCountForm">
+        <h3>Count Words in Text</h3>
+        <label for="textInput">Enter text:</label><br>
+        <textarea id="textInput" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit" id="countWordsButton">Count Words</button>
+      </form>
+
+      <ol id="containerList">
+        <li>Block 1</li>
+        <li>Block 2</li>
+        <li>Block 3</li>
+        <li>Block 4</li>
+        <li>Block 5</li>
+      </ol>
+    </div>
+
+    <div class="segment" id="segment4">
+      <h1 id="heading-Y">Main page</h1>
+    </div>
+  </div>
+
+  <div class="middle-segment segment"></div>
+
+  <div class="right-segment">
+    <div class="segment" id="segment2"></div>
+    <div class="text-containing-segment segment" id="segment5">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('calculateAreaButton').addEventListener('click', () => {
+    const base = parseFloat(document.getElementById('baseInput').value);
+    const height = parseFloat(document.getElementById('heightInput').value);
+
+    if (!isNaN(base) && !isNaN(height) && base > 0 && height > 0) {
+      const area = base * height;
+      document.getElementById('areaResult').textContent = `Area: ${area}`;
+    } else {
+      document.getElementById('areaResult').textContent = 'Please enter valid base and height!';
+    }
+  });
+
+  document.getElementById('wordCountForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = document.getElementById('textInput').value.trim();
+    const wordCount = text.split(/\s+/).filter(word => word).length;
+
+    alert(`Word count: ${wordCount}`);
+    document.cookie = `wordCount=${wordCount};path=/;max-age=3600`;
+  });
+
+  window.addEventListener('load', () => {
+    const cookies = document.cookie.split('; ').find(row => row.startsWith('wordCount='));
+    if (cookies) {
+      const count = cookies.split('=')[1];
+      if (confirm(`Saved word count: ${count}. Click OK to delete the cookie.`)) {
+        document.cookie = `wordCount=;path=/;max-age=0`;
+        alert('Cookie deleted.');
+        location.reload();
+      }
+    }
+  });
+
+  const segment2 = document.getElementById('segment2');
+  segment2.addEventListener('mouseout', () => {
+    const color = prompt('Enter a background color for this block:');
+    if (color) {
+      segment2.style.backgroundColor = color;
+      localStorage.setItem('segment2Color', color);
+    }
+  });
+
+  const savedColor = localStorage.getItem('segment2Color');
+  if (savedColor) {
+    segment2.style.backgroundColor = savedColor;
+  }
+
+  document.getElementById('containerList').addEventListener('click', (e) => {
+    const targetBlockId = `segment${e.target.textContent.trim().slice(-1)}`;
+    const targetBlock = document.getElementById(targetBlockId);
+
+    if (!targetBlock || !targetBlock.innerText.trim()) {
+      alert('Background images can only be added to containers with text.');
+      return;
+    }
+
+    if (targetBlock.querySelector('.bg-form')) return;
+
+    const form = document.createElement('div');
+    form.classList.add('bg-form');
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Enter background img URL';
+    form.appendChild(input);
+
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Background';
+    saveButton.type = 'button';
+    form.appendChild(saveButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete Background';
+    deleteButton.type = 'button';
+    form.appendChild(deleteButton);
+
+    targetBlock.appendChild(form);
+
+    saveButton.addEventListener('click', () => {
+      const url = input.value.trim();
+      if (url) {
+        targetBlock.style.backgroundImage = `url(${url})`;
+        targetBlock.style.backgroundSize = 'cover';
+        localStorage.setItem(`bg_${targetBlockId}`, url);
+        alert('Background saved!');
+      } else {
+        alert('Please enter a valid URL.');
+      }
+    });
+
+    deleteButton.addEventListener('click', () => {
+      targetBlock.style.backgroundImage = '';
+      localStorage.removeItem(`bg_${targetBlockId}`);
+      alert('Background deleted!');
+    });
+  });
+
+  window.onload = () => {
+    for (let i = 1; i <= 5; i++) {
+      const blockId = `segment${i}`;
+      const savedBg = localStorage.getItem(`bg_${blockId}`);
+      if (savedBg) {
+        const block = document.getElementById(blockId);
+        block.style.backgroundImage = `url(${savedBg})`;
+        block.style.backgroundSize = 'cover';
+      }
+    }
+  };
+</script>
+</body>
+</html>
